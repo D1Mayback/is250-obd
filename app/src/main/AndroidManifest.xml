@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
+    <!-- Android 11+ package visibility: let us see the FYT CAN service -->
+    <queries>
+        <package android:name="com.syu.ms" />
+        <intent>
+            <action android:name="com.syu.ms.toolkit" />
+        </intent>
+    </queries>
+
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
 
@@ -17,6 +25,11 @@
         android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
+            android:name=".LiveCanActivity"
             android:exported="true"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden">
