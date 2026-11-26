@@ -57,6 +57,8 @@ public class LiveCanActivity extends Activity implements FytCan.Listener {
     private TextView status, valuesView, logView;
     private FytCan can;
     private boolean paused;
+    /** Default: only show the CAN box module (M7). M0 is the head unit itself (touches, voltage, temps). */
+    private boolean carOnly = true;
     private boolean redrawQueued;
     private long connectedAt;
 
@@ -82,6 +84,11 @@ public class LiveCanActivity extends Activity implements FytCan.Listener {
         bar.addView(button("Pause", b -> {
             paused = !paused;
             ((Button) b).setText(paused ? "Resume" : "Pause");
+        }));
+        bar.addView(button("Car only (M7)", b -> {
+            carOnly = !carOnly;
+            ((Button) b).setText(carOnly ? "Car only (M7)" : "All (M0+M7)");
+            queueRedraw();
         }));
         bar.addView(button("Mark", b -> addLog("—————— MARK ——————")));
         bar.addView(button("Clear log", b -> { log.clear(); queueRedraw(); }));
@@ -142,13 +149,13 @@ public class LiveCanActivity extends Activity implements FytCan.Listener {
                 e.value = v;
                 e.changedAt = snapshot ? 0 : now;
                 values.put(key, e);
-                if (!snapshot) addLog(label(module, field) + "  new  " + v);
+                if (!snapshot && !(carOnly && module == 0)) addLog(label(module, field) + "  new  " + v);
             } else if (!e.value.equals(v)) {
                 String old = e.value;
                 e.value = v;
                 e.changedAt = now;
                 e.changes++;
-                if (!paused) addLog(label(module, field) + "  " + old + "  →  " + v);
+                if (!paused && !(carOnly && module == 0)) addLog(label(module, field) + "  " + old + "  →  " + v);
             }
             queueRedraw();
         });
@@ -182,6 +189,7 @@ public class LiveCanActivity extends Activity implements FytCan.Listener {
         for (Map.Entry<Long, Entry> me : values.entrySet()) {
             int module = (int) (me.getKey() >> 32);
             int field = (int) (me.getKey() & 0xffffffffL);
+            if (carOnly && module == 0) continue;
             Entry e = me.getValue();
             int start = vs.length();
             vs.append(label(module, field)).append("  ").append(e.value);
