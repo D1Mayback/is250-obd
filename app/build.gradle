@@ -1,0 +1,44 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.d1mayback.is250obd'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.d1mayback.is250obd'
+        // Head unit runs Android 8.1 (API 27)
+        minSdk 26
+        targetSdk 34
+        versionCode Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
+        versionName "0.1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    signingConfigs {
+        // Fixed key committed to the repo so every build installs over the last one.
+        sideload {
+            storeFile file('sideload.keystore')
+            storePassword 'is250obd'
+            keyAlias 'is250obd'
+            keyPassword 'is250obd'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.sideload
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
